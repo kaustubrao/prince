@@ -131,7 +131,7 @@ The `PCA` class implements scikit-learn's `fit`/`transform` API. It's parameters
 ...     rescale_with_std=True,
 ...     copy=True,
 ...     check_input=True,
-...     engine='auto',
+...     engine='sklearn',
 ...     random_state=42
 ... )
 >>> pca = pca.fit(X)
@@ -145,7 +145,7 @@ The available parameters are:
 - `rescale_with_mean`: whether to substract each column's mean
 - `rescale_with_std`: whether to divide each column by it's standard deviation
 - `copy`: if `False` then the computations will be done inplace which can have possible side-effects on the input data
-- `engine`: what SVD engine to use (should be one of `['auto', 'fbpca', 'sklearn']`)
+- `engine`: what SVD engine to use (should be one of `['fbpca', 'sklearn']`)
 - `random_state`: controls the randomness of the SVD results.
 
 Once the `PCA` has been fitted, it can be used to extract the row principal coordinates as so:
@@ -280,7 +280,7 @@ Unlike the `PCA` class, the `CA` only exposes scikit-learn's `fit` method.
 ...     n_iter=3,
 ...     copy=True,
 ...     check_input=True,
-...     engine='auto',
+...     engine='sklearn',
 ...     random_state=42
 ... )
 >>> X.columns.rename('Hair color', inplace=True)
@@ -371,7 +371,7 @@ The `MCA` also implements the `fit` and `transform` methods.
 ...     n_iter=3,
 ...     copy=True,
 ...     check_input=True,
-...     engine='auto',
+...     engine='sklearn',
 ...     random_state=42
 ... )
 >>> mca = mca.fit(X)
@@ -494,7 +494,7 @@ Now we can fit an `MFA`.
 ...     n_iter=3,
 ...     copy=True,
 ...     check_input=True,
-...     engine='auto',
+...     engine='sklearn',
 ...     random_state=42
 ... )
 >>> mfa = mfa.fit(X)
@@ -664,7 +664,7 @@ Now we can fit an `FAMD`.
 ...     n_iter=3,
 ...     copy=True,
 ...     check_input=True,
-...     engine='auto',
+...     engine='sklearn',
 ...     random_state=42
 ... )
 >>> famd = famd.fit(X.drop('Oak type', axis='columns'))
