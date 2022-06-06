@@ -7,6 +7,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 from . import ca
 from . import plot
+from . import onehot
 
 
 class MCA(ca.CA):
@@ -34,7 +35,7 @@ class MCA(ca.CA):
             self.K = K
         n_initial_columns = X.shape[1]
         # One-hot encode the data
-        self.enc = OneHotEncoder(handle_unknown='ignore', sparse=False)
+        self.enc = onehot.OneHotEncoder(handle_unknown='ignore', sparse=False)
         self.enc.fit(X)
         one_hot = self.enc.transform(X)
         
