@@ -35,7 +35,7 @@ class MCA(ca.CA):
             self.K = K
         n_initial_columns = X.shape[1]
         # One-hot encode the data
-        self.enc = onehot.OneHotEncoder(handle_unknown='ignore', sparse=False)
+        self.enc = onehot.OneHotEncoder()
         self.enc.fit(X)
         one_hot = self.enc.transform(X)
         
