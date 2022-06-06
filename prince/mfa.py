@@ -11,6 +11,7 @@ from sklearn.preprocessing import OneHotEncoder
 from . import mca
 from . import pca
 from . import plot
+from . import onehot
 
 
 class MFA(pca.PCA):
@@ -76,7 +77,9 @@ class MFA(pca.PCA):
             self.partial_factor_analysis_[name] = fa.fit(X.loc[:, cols])
 
         # Fit the global PCA
-        super().fit(self._build_X_global(X))
+        _X_global=  self._build_X_global(X)
+        super().fit(_X_global)
+        self._usecols= _X_global.columns
 
         return self
 
@@ -113,7 +116,7 @@ class MFA(pca.PCA):
                 try:
                     tmp= pd.DataFrame(self.enc.transform(X_partial))
                 except AttributeError:
-                    self.enc = OneHotEncoder(handle_unknown='ignore', sparse=False)
+                    self.enc = onehot.OneHotEncoder()
                     self.enc.fit(X_partial)
                     tmp= pd.DataFrame(self.enc.transform(X_partial))
                 centre_tmp = tmp.mean() / len(tmp)
@@ -137,10 +140,16 @@ class MFA(pca.PCA):
         X_global = pd.concat(X_partials, axis='columns')
         X_global.index = X.index
         return X_global
-
+    
+    def _transform(self, X_global):
+        """Returns the row principal coordinates."""
+        return  len(X_global) ** 0.5 * super()._transform(X_global)
+    
     def transform(self, X):
         """Returns the row principal coordinates of a dataset."""
-        return self.row_coordinates(X)
+        X = self._prepare_input(X)
+        X_global = self._build_X_global(X)
+        return self._transform(X_global)
 
     def _row_coordinates_from_global(self, X_global):
         """Returns the row principal coordinates."""
