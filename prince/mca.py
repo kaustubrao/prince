@@ -32,19 +32,23 @@ class MCA(ca.CA):
             raise ValueError(f"K ({K}) can't be higher than number of columns ({X.shape[1]})")
         else:
             self.K = K
-
+        n_initial_columns = X.shape[1]
         # One-hot encode the data
         self.enc = OneHotEncoder(handle_unknown='ignore', sparse=False)
         self.enc.fit(X)
         one_hot = self.enc.transform(X)
+        
+        _0_freq_serie= (one_hot == 0).sum(axis=0)/ len(one_hot)
+        self._usecols=_0_freq_serie.index
 
         # We need the number of columns to apply the Greenacre correction
         self.J = one_hot.shape[1]
 
         # Apply CA to the indicator matrix
-        super().fit(one_hot)
+        super().fit(one_hot.loc[:,self._usecols])
 
-        self.total_inertia_ = np.sum(self.eigenvalues_)
+        n_new_columns = len(self._usecols)
+        self.total_inertia_ = (n_new_columns - n_initial_columns) / n_initial_columns
         return self
 
     @property
@@ -87,19 +91,22 @@ class MCA(ca.CA):
         if not isinstance(X, pd.DataFrame):
             X = pd.DataFrame(X)
         
-        return super().row_coordinates(self.enc.transform(X))
+        return super().row_coordinates(self.enc.transform(X).loc[:,self._usecols])
 
     def column_coordinates(self, X):
         if not isinstance(X, pd.DataFrame):
             X = pd.DataFrame(X)
-        return super().column_coordinates(self.enc.transform(X))
+        return super().column_coordinates(self.enc.transform(X).loc[:,self._usecols])
+    
+    def _transform(self, X):
+        return super()._transform(self.enc.transform(X).loc[:,self._usecols])
 
     def transform(self, X):
         """Computes the row principal coordinates of a dataset."""
         self._check_is_fitted()
         if self.check_input:
             utils.check_array(X, dtype=[str, np.number])
-        return self.row_coordinates(X)
+        return super()._transform(X)
 
     def plot_coordinates(self, X, ax=None, figsize=(6, 6), x_component=0, y_component=1,
                          show_row_points=True, row_points_size=10, row_points_alpha=0.6,
