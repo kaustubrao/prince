@@ -106,36 +106,14 @@ class MFA(pca.PCA):
     def _build_X_global(self, X):
         X_partials = []
 
-        for name, cols in sorted(self.groups.items()):
+        for name, cols in self.groups.items():
             X_partial = X.loc[:, cols]
 
-            # Dummify if there are categorical variable
-            if not self.all_nums_[name]:
-
-                # From FactoMineR MFA code, needs checking
-                try:
-                    tmp= pd.DataFrame(self.enc.transform(X_partial))
-                except AttributeError:
-                    self.enc = onehot.OneHotEncoder()
-                    self.enc.fit(X_partial)
-                    tmp= pd.DataFrame(self.enc.transform(X_partial))
-                centre_tmp = tmp.mean() / len(tmp)
-                tmp2 = tmp / len(tmp)
-                poids_bary = tmp2.sum()
-                poids_tmp = 1 - tmp2.sum()
-                ponderation = poids_tmp ** .5 / (self.partial_factor_analysis_[name].s_[0] * len(cols))
-
-                normalize = lambda x: x / (np.sqrt((x ** 2).sum()) or 1)
-                tmp = (tmp - tmp.mean()).apply(normalize, axis='rows')
-
-                X_partial = tmp
-                X_partial *= ponderation ** .5
-
-                X_partials.append(X_partial)
-
-            else:
-
-                X_partials.append(X_partial / self.partial_factor_analysis_[name].s_[0])
+            if self.partial_factor_analysis_[name].__class__.__name__ == 'MCA':
+                check_is_fitted(self.partial_factor_analysis_[name],'_usecols')
+                X_partial = self.partial_factor_analysis_[name].one_hot_.transform(X_partial).loc[:, self.partial_factor_analysis_[name]._usecols]
+            
+            X_partials.append(X_partial / self.partial_factor_analysis_[name].singular_values_[0])
 
         X_global = pd.concat(X_partials, axis='columns')
         X_global.index = X.index
